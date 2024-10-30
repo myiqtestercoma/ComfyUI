@@ -7,7 +7,15 @@ import folder_paths
 import time
 from comfy.cli_args import args
 from app.logger import setup_logger
+import comfy.options
+comfy.options.enable_args_parsing()
 
+import os
+import importlib.util
+import folder_paths
+import time
+from comfy.cli_args import args
+from app.logger import setup_logger
 import threading
 
 def preload_flux_background():
