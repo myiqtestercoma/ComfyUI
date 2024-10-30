@@ -16,22 +16,31 @@ import folder_paths
 import time
 from comfy.cli_args import args
 from app.logger import setup_logger
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+import setup_logger
+
 import threading
+
 
 def preload_flux_background():
     import torch
     from nodes import NODE_CLASS_MAPPINGS
     from comfy import model_management
-    print("Starting Flux model preload in background...")
+    print 'Starting Flux model preload in background...'
     model_management.vram_state = model_management.VRAMState.HIGH_VRAM
     model_management.args.gpu_only = True
-    def keep_models_loaded(models, memory_required=0, force_patch_weights=False):
+
+    def keep_models_loaded(models, memory_required=0,
+                           force_patch_weights=False):
         return []
+
     model_management.free_memory = keep_models_loaded
-    device = torch.device("cuda")
-    UNETLoader = NODE_CLASS_MAPPINGS["UNETLoader"]()
+    device = torch.device('cuda')
+    UNETLoader = NODE_CLASS_MAPPINGS['UNETLoader']()
     with torch.inference_mode():
-        unet = UNETLoader.load_unet("flux1-dev.safetensors", "default")[0]
+        unet = UNETLoader.load_unet('flux1-dev.safetensors', 'default'
+                                    )[0]
         if hasattr(unet, 'model'):
             unet.model = unet.model.to(device)
         loaded_model = model_management.LoadedModel(unet)
@@ -39,12 +48,12 @@ def preload_flux_background():
         loaded_model.weights_loaded = True
         loaded_model.currently_used = True
         model_management.current_loaded_models.insert(0, loaded_model)
-    print("Flux model preloaded successfully")
+    print 'Flux model preloaded successfully'
+
 
 preload_thread = threading.Thread(target=preload_flux_background)
 preload_thread.daemon = True
 preload_thread.start()
-
 setup_logger(log_level=args.verbose)
 
 
